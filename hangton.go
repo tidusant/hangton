@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"strings"
 	"unicode"
 
@@ -26,7 +27,7 @@ var errmsg = ""
 
 func init() {
 	hangton = []HangTonData{}
-	errmsg = getExcelData()
+	getExcelData()
 }
 
 func main() {
@@ -71,11 +72,60 @@ func main() {
 
 	})
 
+	router.GET("/file", func(c *gin.Context) {
+		router.LoadHTMLGlob("html/*")
+
+		c.HTML(http.StatusOK,
+			// Use the index.html template
+			"file.html",
+			// Pass the data that the page uses (in this case, 'title')
+			gin.H{
+				"title": "Upload file",
+			})
+
+	})
+
+	router.POST("/file", func(c *gin.Context) {
+		router.LoadHTMLGlob("html/*")
+
+		form, _ := c.MultipartForm()
+		files := form.File["file"]
+		for i, file := range files {
+			log.Debugf("filename %d:%s - %s, %v", i, file.Filename, file.Header)
+
+			filetmp, _ := file.Open()
+
+			//file name
+
+			filename := "tonkho.xlsx"
+			data, err := ioutil.ReadAll(filetmp)
+			if err != nil {
+				errmsg = fmt.Sprintf("%v", err)
+				c.String(http.StatusOK, errmsg)
+			}
+			err = ioutil.WriteFile("./data/"+filename, data, 0666)
+			if err != nil {
+				errmsg = fmt.Sprintf("%v", err)
+				c.String(http.StatusOK, errmsg)
+			}
+		}
+
+		c.HTML(http.StatusOK,
+			// Use the index.html template
+			"file.html",
+			// Pass the data that the page uses (in this case, 'title')
+			gin.H{
+				"title": "Upload file",
+			})
+
+	})
+
 	router.Run(":" + strconv.Itoa(port))
 
 }
 
 func searchhangton(search string) string {
+	log.Debugf("searchhangton error message:%s", errmsg)
 	if errmsg != "" {
 		return errmsg
 	}
@@ -101,10 +151,16 @@ func searchhangton(search string) string {
 	return string(b)
 }
 
-func getExcelData() string {
+func getExcelData() {
+	defer func() { //catch or finally
+		if err := recover(); err != nil { //catch
+			errmsg = fmt.Sprintf("Exception: %v", err)
+		}
+	}()
+
 	xlsx, err := excelize.OpenFile("./data/tonkho.xlsx")
 	if err != nil {
-		return err.Error()
+		errmsg = err.Error()
 
 	}
 
@@ -161,11 +217,10 @@ func getExcelData() string {
 		d.TL4, _ = strconv.Atoi(rowdata[34])
 		d.TL5, _ = strconv.Atoi(rowdata[35])
 		d.TL6, _ = strconv.Atoi(rowdata[36])
-		log.Debugf("%v", d)
+
 		hangton = append(hangton, d)
-		fmt.Println()
+
 	}
-	return ""
 }
 
 // checkCellInArea provides function to determine if a given coordinate is
