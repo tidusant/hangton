@@ -237,6 +237,7 @@ func getExcelData() {
 		hangton = append(hangton, d)
 
 	}
+	errmsg = ""
 }
 
 // checkCellInArea provides function to determine if a given coordinate is
