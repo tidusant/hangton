@@ -75,7 +75,7 @@ func main() {
 	router.POST("/hang", func(c *gin.Context) {
 		//search := c.Param("search")
 		search := c.PostForm("text")
-		log.Debugf("search text %s %v", search, c.Params)
+		//log.Debugf("search text %s %v", search, c.Params)
 		search = strings.Trim(search, " ")
 		strrt := ""
 
@@ -86,6 +86,15 @@ func main() {
 		} else {
 			log.Debugf("check request error")
 		}
+		strrt = `{
+			"response_type": "ephemeral",
+			"text": "How to use /please",
+			"attachments":[
+				{
+				   "text":"To be fed, use /please feed to request food. We hear the elf needs food badly.\nTo tease, use /please tease &mdash; we always knew you liked noogies.\nYou've already learned how to get help with /please help."
+				}
+			]
+		 }`
 		c.String(http.StatusOK, strrt)
 
 	})
@@ -144,7 +153,7 @@ func main() {
 }
 
 func searchhangton(search string) string {
-	log.Debugf("searchhangton error message:%s", errmsg)
+	//log.Debugf("searchhangton error message:%s", errmsg)
 	if errmsg != "" {
 		return errmsg
 	}
