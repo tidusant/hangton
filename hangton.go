@@ -125,6 +125,7 @@ func main() {
 				c.String(http.StatusOK, errmsg)
 			}
 		}
+		getExcelData()
 
 		c.HTML(http.StatusOK,
 			// Use the index.html template
