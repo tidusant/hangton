@@ -75,6 +75,7 @@ func main() {
 	router.POST("/hang/:search", func(c *gin.Context) {
 		//search := c.Param("search")
 		search := c.PostForm("text")
+		log.Debugf("search text %s %v", search, c.Params)
 		search = strings.Trim(search, " ")
 		strrt := ""
 
