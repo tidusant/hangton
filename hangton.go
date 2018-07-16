@@ -165,7 +165,7 @@ func searchhangton(search string) string {
 		}
 	}
 	b, _ := json.Marshal(datareturns)
-	return string(b)
+	return `{"text": "New Help Ticket Received:","data":` + string(b) + `}`
 }
 
 func getExcelData() {
