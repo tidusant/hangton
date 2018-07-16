@@ -57,8 +57,7 @@ func main() {
 	router := gin.Default()
 
 	router.GET("/hang/:search", func(c *gin.Context) {
-		//search := c.Param("search")
-		search := c.PostForm("text")
+		search := c.Param("search")
 		search = strings.Trim(search, " ")
 		strrt := ""
 
@@ -74,7 +73,8 @@ func main() {
 	})
 
 	router.POST("/hang/:search", func(c *gin.Context) {
-		search := c.Param("search")
+		//search := c.Param("search")
+		search := c.PostForm("text")
 		search = strings.Trim(search, " ")
 		strrt := ""
 
