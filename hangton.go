@@ -68,6 +68,16 @@ func main() {
 		} else {
 			log.Debugf("check request error")
 		}
+		c.Header("response_type", "ephemeral")
+		strrt = `{
+			"response_type": "ephemeral",
+			"text": "How to use /please",
+			"attachments":[
+				{
+				   "text":"To be fed, use /please feed to request food. We hear the elf needs food badly.\nTo tease, use /please tease &mdash; we always knew you liked noogies.\nYou've already learned how to get help with /please help."
+				}
+			]
+		 }`
 		c.String(http.StatusOK, strrt)
 
 	})
@@ -86,6 +96,7 @@ func main() {
 		} else {
 			log.Debugf("check request error")
 		}
+		c.Header("response_type", "ephemeral")
 		strrt = `{
 			"response_type": "ephemeral",
 			"text": "How to use /please",
