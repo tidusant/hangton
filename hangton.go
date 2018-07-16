@@ -72,6 +72,22 @@ func main() {
 
 	})
 
+	router.POST("/hang/:search", func(c *gin.Context) {
+		search := c.Param("search")
+		search = strings.Trim(search, " ")
+		strrt := ""
+
+		if search != "" {
+			search = strings.ToLower(search)
+			strrt = searchhangton(search)
+
+		} else {
+			log.Debugf("check request error")
+		}
+		c.String(http.StatusOK, strrt)
+
+	})
+
 	router.GET("/file", func(c *gin.Context) {
 		router.LoadHTMLGlob("html/*")
 
