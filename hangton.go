@@ -68,7 +68,7 @@ func main() {
 		} else {
 			log.Debugf("check request error")
 		}
-		c.Header("response_type", "ephemeral")
+
 		strrt = `{
 			"response_type": "ephemeral",
 			"text": "How to use /please",
@@ -78,7 +78,18 @@ func main() {
 				}
 			]
 		 }`
-		c.String(http.StatusOK, strrt)
+
+		// c.Header("Content-Type", "application/json; charset=utf-8")
+		// c.Next()
+		// c.JSON(http.StatusOK, strrt)
+
+		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
+
+		// log.Debugf("%s", strrt)
+		// c.Bind(&hangton)
+		// c.JSON(http.StatusOK, hangton)
+
+		//c.String(http.StatusOK, strrt)
 
 	})
 
@@ -96,7 +107,8 @@ func main() {
 		} else {
 			log.Debugf("check request error")
 		}
-		c.Header("response_type", "ephemeral")
+		c.Header("Response-Type", "ephemeral")
+		c.Header("Content-Type", "application/json")
 		strrt = `{
 			"response_type": "ephemeral",
 			"text": "How to use /please",
