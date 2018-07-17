@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -16,6 +15,7 @@ import (
 	"net/http"
 	//	"os"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -24,6 +24,7 @@ var mytoken string
 var SheetName = "Sheet1"
 var hangton []HangTonData
 var errmsg = ""
+var updatetime = time.Now()
 
 func init() {
 	hangton = []HangTonData{}
@@ -69,16 +70,6 @@ func main() {
 			log.Debugf("check request error")
 		}
 
-		strrt = `{
-			"response_type": "ephemeral",
-			"text": "How to use /please",
-			"attachments":[
-				{
-				   "text":"To be fed, use /please feed to request food. We hear the elf needs food badly.\nTo tease, use /please tease &mdash; we always knew you liked noogies.\nYou've already learned how to get help with /please help."
-				}
-			]
-		 }`
-
 		// c.Header("Content-Type", "application/json; charset=utf-8")
 		// c.Next()
 		// c.JSON(http.StatusOK, strrt)
@@ -109,15 +100,7 @@ func main() {
 		}
 		c.Header("Response-Type", "ephemeral")
 		c.Header("Content-Type", "application/json")
-		strrt = `{
-			"response_type": "ephemeral",
-			"text":` + strrt + `,
-			"attachments":[
-				{
-				   "text":"To be fed, use /please feed to request food. We hear the elf needs food badly.\nTo tease, use /please tease &mdash; we always knew you liked noogies.\nYou've already learned how to get help with /please help."
-				}
-			]
-		 }`
+		//https://api.slack.com/docs/message-attachments
 		// c.String(http.StatusOK, strrt)
 
 		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
@@ -162,13 +145,17 @@ func main() {
 			}
 		}
 		getExcelData()
-
+		message := "Done, " + strconv.Itoa(len(hangton)) + " rows were updated"
+		if errmsg != "" {
+			message = errmsg
+		}
 		c.HTML(http.StatusOK,
 			// Use the index.html template
 			"file.html",
 			// Pass the data that the page uses (in this case, 'title')
 			gin.H{
-				"title": "Upload file",
+				"title":   "Upload file",
+				"message": message,
 			})
 
 	})
@@ -183,25 +170,90 @@ func searchhangton(search string) string {
 		return errmsg
 	}
 
-	datareturns := []HangTonDataReturn{}
+	data := ``
+	count := 0
+	text := ``
+
 	for _, dat := range hangton {
 		if strings.Index(dat.TenHang, search) >= 0 || strings.ToLower(dat.MaHang) == search {
-			var d HangTonDataReturn
-			d.MaHang = dat.MaHang
-			d.TenHang = dat.TenHang
-			d.Tong2Kho = dat.Tong2Kho
-			d.UocLuongBan4Thang = dat.UocLuongBan4Thang
-			d.TL1 = dat.TL1
-			d.TL2 = dat.TL2
-			d.TL3 = dat.TL3
-			d.TL4 = dat.TL4
-			d.TL5 = dat.TL5
-			d.TL6 = dat.TL6
-			datareturns = append(datareturns, d)
+			color := "#7CD197"
+			if count%2 == 0 {
+				color = "#F35A00"
+			}
+			data += `{`
+			data += `"title": "` + dat.TenHang + `",
+			"title_link": "https://phuem.com/",
+			"color": "` + color + `",
+			"fields": [
+                {
+                    "title": "Mã Hàng",
+                    "value": "` + dat.MaHang + `",
+                    "short": true
+                },
+                {
+                    "title": "Tổng 2 Kho",
+                    "value": "` + strconv.Itoa(dat.Tong2Kho) + `",
+                    "short": true
+				}
+				,
+                {
+                    "title": "Ước Lượng Bán 4 tháng",
+                    "value": "` + strconv.Itoa(dat.UocLuongBan4Thang) + `",
+                    "short": false
+				},
+				{
+                    "title": "Tương Lai 1",
+                    "value": "` + strconv.Itoa(dat.TL1) + `",
+                    "short": true
+				}
+				,
+				{
+                    "title": "Tương Lai 1",
+                    "value": "` + strconv.Itoa(dat.TL2) + `",
+                    "short": true
+				}
+				,
+				{
+                    "title": "Tương Lai 3",
+                    "value": "` + strconv.Itoa(dat.TL3) + `",
+                    "short": true
+				}
+				,
+				{
+                    "title": "Tương Lai 4",
+                    "value": "` + strconv.Itoa(dat.TL4) + `",
+                    "short": true
+				}
+				,
+				{
+                    "title": "Tương Lai 5",
+                    "value": "` + strconv.Itoa(dat.TL5) + `",
+                    "short": true
+				}
+				,
+				{
+                    "title": "Tương Lai 6",
+                    "value": "` + strconv.Itoa(dat.TL6) + `",
+                    "short": true
+				}				
+            ]`
+			data += "},"
+			count++
 		}
 	}
-	b, _ := json.Marshal(datareturns)
-	return `{"text": "New Help Ticket Received:","data":` + string(b) + `}`
+	text += `{"text":"`
+	attachments := ""
+	if count > 0 {
+		text += strconv.Itoa(count) + ` founds\n`
+		data = data[:len(data)-1]
+		attachments = `,"attachments": [` + data + `]`
+	} else {
+		text += ` not founds\n`
+	}
+
+	text += `updated at: ` + updatetime.Format("15:04 02-01-2006") + `" ` + attachments + `}`
+
+	return text
 }
 
 func getExcelData() {
@@ -275,6 +327,7 @@ func getExcelData() {
 
 	}
 	errmsg = ""
+	updatetime = time.Now()
 }
 
 // checkCellInArea provides function to determine if a given coordinate is
