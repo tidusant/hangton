@@ -118,7 +118,9 @@ func main() {
 				}
 			]
 		 }`
-		c.String(http.StatusOK, strrt)
+		// c.String(http.StatusOK, strrt)
+
+		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
 
 	})
 
