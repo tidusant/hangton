@@ -175,7 +175,7 @@ func searchhangton(search string) string {
 	text := ``
 
 	for _, dat := range hangton {
-		if strings.Index(dat.TenHang, search) >= 0 || strings.ToLower(dat.MaHang) == search {
+		if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
 			color := "#7CD197"
 			if count%2 == 0 {
 				color = "#F35A00"
