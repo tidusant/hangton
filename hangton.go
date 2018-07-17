@@ -111,7 +111,7 @@ func main() {
 		c.Header("Content-Type", "application/json")
 		strrt = `{
 			"response_type": "ephemeral",
-			"text": "How to use /please",
+			"text":` + strrt + `,
 			"attachments":[
 				{
 				   "text":"To be fed, use /please feed to request food. We hear the elf needs food badly.\nTo tease, use /please tease &mdash; we always knew you liked noogies.\nYou've already learned how to get help with /please help."
