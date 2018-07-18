@@ -274,6 +274,7 @@ func getExcelData() {
 
 	sheetdata := xlsx.Sheet["xl/worksheets/sheet1.xml"]
 	mergecells := sheetdata.MergeCells.Cells
+	hdata := []HangTonData{}
 	for irow, row := range rows {
 		if irow < 5 {
 			continue
@@ -323,9 +324,10 @@ func getExcelData() {
 		d.TL5, _ = strconv.Atoi(rowdata[35])
 		d.TL6, _ = strconv.Atoi(rowdata[36])
 
-		hangton = append(hangton, d)
+		hdata = append(hdata, d)
 
 	}
+	hangton = hdata
 	errmsg = ""
 	updatetime = time.Now()
 }
