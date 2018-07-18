@@ -180,12 +180,9 @@ func searchhangton(search string) string {
 			if _, ok := datahang[dat.MaHang]; ok {
 				dattemp := datahang[dat.MaHang]
 				dattemp.UocLuongBan4Thang += dat.UocLuongBan4Thang
-				dattemp.TL1 += dat.TL1
-				dattemp.TL2 += dat.TL2
-				dattemp.TL3 += dat.TL3
-				dattemp.TL4 += dat.TL4
-				dattemp.TL5 += dat.TL5
-				dattemp.TL6 += dat.TL6
+				for key, sl := range dat.TL {
+					dattemp.TL[key] += sl
+				}
 				datahang[dat.MaHang] = dattemp
 			} else {
 				datahang[dat.MaHang] = dat
@@ -197,6 +194,16 @@ func searchhangton(search string) string {
 		if count%2 == 0 {
 			color = "#F35A00"
 		}
+		//arrival
+		arrival := ""
+		for name, sl := range dat.TL {
+			if sl > 0 {
+				arrival += `,{"title": "` + name + `",
+				"value": "` + strconv.Itoa(sl) + `",
+				"short": false}`
+			}
+		}
+
 		data += `{`
 		data += `"title": "` + dat.TenHang + `",
 			"title_link": "https://phuem.com/",
@@ -217,42 +224,7 @@ func searchhangton(search string) string {
                     "title": "Ước Lượng Bán 4 tháng",
                     "value": "` + strconv.Itoa(dat.UocLuongBan4Thang) + `",
                     "short": false
-				},
-				{
-                    "title": "Tương Lai 1",
-                    "value": "` + strconv.Itoa(dat.TL1) + `",
-                    "short": true
-				}
-				,
-				{
-                    "title": "Tương Lai 1",
-                    "value": "` + strconv.Itoa(dat.TL2) + `",
-                    "short": true
-				}
-				,
-				{
-                    "title": "Tương Lai 3",
-                    "value": "` + strconv.Itoa(dat.TL3) + `",
-                    "short": true
-				}
-				,
-				{
-                    "title": "Tương Lai 4",
-                    "value": "` + strconv.Itoa(dat.TL4) + `",
-                    "short": true
-				}
-				,
-				{
-                    "title": "Tương Lai 5",
-                    "value": "` + strconv.Itoa(dat.TL5) + `",
-                    "short": true
-				}
-				,
-				{
-                    "title": "Tương Lai 6",
-                    "value": "` + strconv.Itoa(dat.TL6) + `",
-                    "short": true
-				}				
+				}` + arrival + `				
             ]`
 		data += "},"
 		count++
@@ -296,11 +268,12 @@ func getExcelData() {
 			continue
 		}
 		var d HangTonData
-
+		d.TL = make(map[string]int)
 		var rowdata []string
 		for icol, colCell := range row {
 
 			celldata := colCell
+			//check mergcell
 			if colCell == "" {
 				for _, mergecell := range mergecells {
 					ref := strings.Split(mergecell.Ref, ":")
@@ -308,13 +281,14 @@ func getExcelData() {
 					cellname := excelize.ToAlphaString(icol) + strconv.Itoa(irow+1)
 					if checkCellInArea(cellname, mergecell.Ref) {
 						celldata = xlsx.GetCellValue(SheetName, ref[0])
-						//log.Debugf("getCellColRow %s: %s ", cellname, celldata)
 						break
 					}
-
-					//log.Debugf("getCellColRow %s: %s %s")
-					//fmt.Print(mergecell.Ref, "\t")
 				}
+			}
+			//check name column
+			colname := xlsx.GetCellValue(SheetName, excelize.ToAlphaString(icol)+"4")
+			if len(colname) > 8 && strings.ToLower(colname[:9]) == "arriving-" {
+				d.TL[colname], _ = strconv.Atoi(celldata)
 			}
 			rowdata = append(rowdata, celldata)
 		}
@@ -333,12 +307,6 @@ func getExcelData() {
 		d.UocLuongBan4Thang, _ = strconv.Atoi(rowdata[28])
 		d.SLCanDauKy, _ = strconv.Atoi(rowdata[29])
 		d.SLCanHienTai, _ = strconv.Atoi(rowdata[30])
-		d.TL1, _ = strconv.Atoi(rowdata[31])
-		d.TL2, _ = strconv.Atoi(rowdata[32])
-		d.TL3, _ = strconv.Atoi(rowdata[33])
-		d.TL4, _ = strconv.Atoi(rowdata[34])
-		d.TL5, _ = strconv.Atoi(rowdata[35])
-		d.TL6, _ = strconv.Atoi(rowdata[36])
 
 		hdata = append(hdata, d)
 
