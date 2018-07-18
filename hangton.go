@@ -173,15 +173,32 @@ func searchhangton(search string) string {
 	data := ``
 	count := 0
 	text := ``
-
+	datahang := make(map[string]HangTonData)
 	for _, dat := range hangton {
 		if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
-			color := "#7CD197"
-			if count%2 == 0 {
-				color = "#F35A00"
+			//check exist
+			if _, ok := datahang[dat.MaHang]; ok {
+				dattemp := datahang[dat.MaHang]
+				dattemp.UocLuongBan4Thang += dat.UocLuongBan4Thang
+				dattemp.TL1 += dat.TL1
+				dattemp.TL2 += dat.TL2
+				dattemp.TL3 += dat.TL3
+				dattemp.TL4 += dat.TL4
+				dattemp.TL5 += dat.TL5
+				dattemp.TL6 += dat.TL6
+				datahang[dat.MaHang] = dattemp
+			} else {
+				datahang[dat.MaHang] = dat
 			}
-			data += `{`
-			data += `"title": "` + dat.TenHang + `",
+		}
+	}
+	for _, dat := range datahang {
+		color := "#7CD197"
+		if count%2 == 0 {
+			color = "#F35A00"
+		}
+		data += `{`
+		data += `"title": "` + dat.TenHang + `",
 			"title_link": "https://phuem.com/",
 			"color": "` + color + `",
 			"fields": [
@@ -237,9 +254,8 @@ func searchhangton(search string) string {
                     "short": true
 				}				
             ]`
-			data += "},"
-			count++
-		}
+		data += "},"
+		count++
 	}
 	text += `{"text":"`
 	attachments := ""
