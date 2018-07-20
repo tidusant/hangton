@@ -287,26 +287,42 @@ func getExcelData() {
 			}
 			//check name column
 			colname := xlsx.GetCellValue(SheetName, excelize.ToAlphaString(icol)+"4")
-			if len(colname) > 8 && strings.ToLower(colname[:9]) == "arriving-" {
+			colnametrim := strings.Trim(strings.ToLower(colname), " ")
+			if colnametrim == "mã nhóm hàng 1" {
+				d.MaNhomHang1 = celldata
+			} else if colnametrim == "mã nhóm hàng 2" {
+				d.MaNhomHang1 = celldata
+			} else if colnametrim == "mã nhóm hàng 3" {
+				d.MaNhomHang1 = celldata
+			} else if colnametrim == "mã nhóm hàng 4" {
+				d.MaNhomHang1 = celldata
+			} else if colnametrim == "kho" {
+				d.MaNhomHang1 = celldata
+			} else if colnametrim == "mã hàng" {
+				d.MaNhomHang1 = celldata
+			} else if colnametrim == "tên hàng" {
+				d.MaNhomHang1 = celldata
+			} else if colnametrim == "đtv" {
+				d.MaNhomHang1 = celldata
+			} else if colnametrim == "tồn cuối sl" {
+				d.TonCuoiSL, _ = strconv.Atoi(celldata)
+			} else if colnametrim == "tổng 2 kho" {
+				d.Tong2Kho, _ = strconv.Atoi(celldata)
+			} else if colnametrim == "giá horeca" {
+				d.GiaHoreca, _ = strconv.Atoi(celldata)
+			} else if colnametrim == "bán trung bình tháng" {
+				d.BanTBThang, _ = strconv.Atoi(celldata)
+			} else if colnametrim == "ước lượng bán 4 tháng" {
+				d.UocLuongBan4Thang, _ = strconv.Atoi(celldata)
+			} else if colnametrim == "số lượng cần đầu kỳ" {
+				d.SLCanDauKy, _ = strconv.Atoi(celldata)
+			} else if colnametrim == "số lượng cần hiện tại" {
+				d.SLCanHienTai, _ = strconv.Atoi(celldata)
+			} else if len(colname) > 8 && strings.ToLower(colname[:9]) == "arriving-" {
 				d.TL[colname], _ = strconv.Atoi(celldata)
 			}
 			rowdata = append(rowdata, celldata)
 		}
-		d.MaNhomHang1 = rowdata[0]
-		d.MaNhomHang2 = rowdata[1]
-		d.MaNhomHang3 = rowdata[2]
-		d.MaNhomHang4 = rowdata[3]
-		d.Kho = rowdata[4]
-		d.MaHang = rowdata[5]
-		d.TenHang = rowdata[6]
-		d.Dvt = rowdata[7]
-		d.TonCuoiSL, _ = strconv.Atoi(rowdata[24])
-		d.Tong2Kho, _ = strconv.Atoi(rowdata[25])
-		d.GiaHoreca, _ = strconv.Atoi(rowdata[26])
-		d.BanTBThang, _ = strconv.Atoi(rowdata[27])
-		d.UocLuongBan4Thang, _ = strconv.Atoi(rowdata[28])
-		d.SLCanDauKy, _ = strconv.Atoi(rowdata[29])
-		d.SLCanHienTai, _ = strconv.Atoi(rowdata[30])
 
 		hdata = append(hdata, d)
 
