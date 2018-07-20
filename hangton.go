@@ -245,11 +245,11 @@ func searchhangton(search string) string {
 }
 
 func getExcelData() {
-	// defer func() { //catch or finally
-	// 	if err := recover(); err != nil { //catch
-	// 		errmsg = fmt.Sprintf("Exception: %v", err)
-	// 	}
-	// }()
+	defer func() { //catch or finally
+		if err := recover(); err != nil { //catch
+			errmsg = fmt.Sprintf("Exception: %v", err)
+		}
+	}()
 
 	xlsx, err := excelize.OpenFile("./data/tonkho.xlsx")
 	if err != nil {
