@@ -245,11 +245,11 @@ func searchhangton(search string) string {
 }
 
 func getExcelData() {
-	defer func() { //catch or finally
-		if err := recover(); err != nil { //catch
-			errmsg = fmt.Sprintf("Exception: %v", err)
-		}
-	}()
+	// defer func() { //catch or finally
+	// 	if err := recover(); err != nil { //catch
+	// 		errmsg = fmt.Sprintf("Exception: %v", err)
+	// 	}
+	// }()
 
 	xlsx, err := excelize.OpenFile("./data/tonkho.xlsx")
 	if err != nil {
@@ -291,19 +291,19 @@ func getExcelData() {
 			if colnametrim == "mã nhóm hàng 1" {
 				d.MaNhomHang1 = celldata
 			} else if colnametrim == "mã nhóm hàng 2" {
-				d.MaNhomHang1 = celldata
+				d.MaNhomHang2 = celldata
 			} else if colnametrim == "mã nhóm hàng 3" {
-				d.MaNhomHang1 = celldata
+				d.MaNhomHang3 = celldata
 			} else if colnametrim == "mã nhóm hàng 4" {
-				d.MaNhomHang1 = celldata
+				d.MaNhomHang4 = celldata
 			} else if colnametrim == "kho" {
-				d.MaNhomHang1 = celldata
+				d.Kho = celldata
 			} else if colnametrim == "mã hàng" {
-				d.MaNhomHang1 = celldata
+				d.MaHang = celldata
 			} else if colnametrim == "tên hàng" {
-				d.MaNhomHang1 = celldata
+				d.TenHang = celldata
 			} else if colnametrim == "đtv" {
-				d.MaNhomHang1 = celldata
+				d.Dvt = celldata
 			} else if colnametrim == "tồn cuối sl" {
 				d.TonCuoiSL, _ = strconv.Atoi(celldata)
 			} else if colnametrim == "tổng 2 kho" {
