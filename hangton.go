@@ -25,6 +25,7 @@ var SheetName = "Sheet1"
 var hangton []HangTonData
 var errmsg = ""
 var updatetime = time.Now()
+var uploadFilename = "data"
 
 func init() {
 	hangton = []HangTonData{}
@@ -131,7 +132,7 @@ func main() {
 			filetmp, _ := file.Open()
 
 			//file name
-
+			uploadFilename = file.Filename
 			filename := "tonkho.xlsx"
 			data, err := ioutil.ReadAll(filetmp)
 			if err != nil {
@@ -239,7 +240,7 @@ func searchhangton(search string) string {
 		text += ` not founds\n`
 	}
 
-	text += `updated at: ` + updatetime.Format("15:04 02-01-2006") + `" ` + attachments + `}`
+	text += `*` + uploadFilename + `* updated at: ` + updatetime.Format("15:04 02-01-2006") + `" ` + attachments + `}`
 
 	return text
 }
