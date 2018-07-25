@@ -180,7 +180,7 @@ func searchhangton(search string) string {
 			//check exist
 			if _, ok := datahang[dat.MaHang]; ok {
 				dattemp := datahang[dat.MaHang]
-				dattemp.UocLuongBan4Thang += dat.UocLuongBan4Thang
+				dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
 				for key, sl := range dat.TL {
 					dattemp.TL[key] += sl
 				}
