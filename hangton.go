@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"html"
 	"io/ioutil"
 	"strings"
 	"unicode"
@@ -206,7 +207,7 @@ func searchhangton(search string) string {
 		}
 
 		data += `{`
-		data += `"title": "` + dat.TenHang + `",
+		data += `"title": "` + html.EscapeString(strings.Replace(strings.Replace(dat.TenHang, "\r\n", " ", -1), "\n", " ", -1)) + `",
 			"title_link": "https://phuem.com/",
 			"color": "` + color + `",
 			"fields": [
@@ -288,7 +289,9 @@ func getExcelData() {
 			}
 			//check name column
 			colname := xlsx.GetCellValue(SheetName, excelize.ToAlphaString(icol)+"4")
+			colname = strings.Replace(strings.Replace(colname, "\r\n", " ", -1), "\n", " ", -1)
 			colnametrim := strings.Trim(strings.ToLower(colname), " ")
+
 			if colnametrim == "mã nhóm hàng 1" {
 				d.MaNhomHang1 = celldata
 			} else if colnametrim == "mã nhóm hàng 2" {
