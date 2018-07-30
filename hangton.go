@@ -40,7 +40,7 @@ func main() {
 	//fmt.Println(mycrypto.Encode("abc,efc", 5))
 	flag.IntVar(&port, "port", 5084, "help message for flagname")
 	flag.BoolVar(&debug, "debug", false, "Indicates if debug messages should be printed in log files")
-	flag.StringVar(&mytoken, "token", "485xvnt", "Indicates if debug messages should be printed in log files")
+	flag.StringVar(&mytoken, "token", "489xvnt", "Indicates if debug messages should be printed in log files")
 	flag.IntVar(&pagesize, "pagesize", 10, "Indicates if debug messages should be printed in log files")
 	flag.Parse()
 
@@ -198,8 +198,8 @@ func searchhangton(search string) string {
 	isTonKho := false
 	page := 1
 	//check page
-	if len(searches) > 1 && searches[len(searches)-1][:4] == "page" {
-		page, _ = strconv.Atoi(searches[len(searches)-1][4:])
+	if len(searches) > 1 && searches[len(searches)-1][:1] == "p" {
+		page, _ = strconv.Atoi(searches[len(searches)-1][1:])
 		searches = searches[:len(searches)-1]
 		search = strings.Join(searches, " ")
 	}
