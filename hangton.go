@@ -110,7 +110,7 @@ func main() {
 		//search := c.Param("search")
 		search := c.PostForm("text")
 		//log.Debugf("search text %s %v", search, c.Params)
-		search = strings.Trim(search, " ")
+
 		strrt := ""
 
 		if search == mytoken {
