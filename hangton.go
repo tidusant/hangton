@@ -321,7 +321,7 @@ func searchhangton(search string) string {
 		if isAuth {
 			strnextpage += " " + mytoken
 		}
-		strnextpage += " page" + strconv.Itoa(page+1)
+		strnextpage += " p" + strconv.Itoa(page+1)
 		data += `{"title":"Next page: ` + strnextpage + `"}`
 	} else {
 		data = data[:len(data)-1]
