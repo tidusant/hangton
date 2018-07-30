@@ -206,6 +206,7 @@ func searchhangton(search string) string {
 	if search == mytoken {
 		isTonKho = true
 		isAuth = true
+		search = ""
 	} else if searches[len(searches)-1] == mytoken {
 		isAuth = true
 		searches = searches[:len(searches)-1]
