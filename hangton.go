@@ -115,7 +115,7 @@ func main() {
 
 		strrt := ""
 
-		if search == mytoken {
+		if search != "" {
 			strrt = searchhangton(search)
 
 		} else {
@@ -222,7 +222,7 @@ func searchhangton(search string) string {
 	matchcount := 0
 	for _, dat := range hangton {
 
-		if (isTonKho && dat.SLCanHienTai < 0) || strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
+		if (isTonKho && dat.SLCanHienTai < 0) || (strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search) && search != "" {
 			//check paging
 			matchcount++
 			if matchcount-1 < (page-1)*pagesize {
@@ -314,11 +314,10 @@ func searchhangton(search string) string {
 	}
 	//show paging
 	if matchcount > page*pagesize {
-		strnextpage := "/hang"
+		strnextpage := "/hang " + search
 		if isTonKho {
 			strnextpage = "/tonkho"
 		}
-		strnextpage += " " + search
 		if isAuth {
 			strnextpage += " " + mytoken
 		}
