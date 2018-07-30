@@ -11,10 +11,10 @@ type HangTonData struct {
 	Dvt               string
 	TonCuoiSL         int
 	Tong2Kho          int
-	GiaHoreca         int
+	GiaHoreca         string
 	BanTBThang        int
 	UocLuongBan4Thang int
 	SLCanDauKy        int
 	SLCanHienTai      int
-	TL                map[string]int
+	TL                map[string]string
 }

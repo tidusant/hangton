@@ -39,7 +39,7 @@ func main() {
 	//fmt.Println(mycrypto.Encode("abc,efc", 5))
 	flag.IntVar(&port, "port", 5084, "help message for flagname")
 	flag.BoolVar(&debug, "debug", false, "Indicates if debug messages should be printed in log files")
-	flag.StringVar(&mytoken, "token", ".fa1Xldsbe@", "Indicates if debug messages should be printed in log files")
+	flag.StringVar(&mytoken, "token", "485@XVNT", "Indicates if debug messages should be printed in log files")
 	flag.Parse()
 
 	//logLevel := log.DebugLevel
@@ -64,7 +64,6 @@ func main() {
 		strrt := ""
 
 		if search != "" {
-			search = strings.ToLower(search)
 			strrt = searchhangton(search)
 
 		} else {
@@ -93,7 +92,28 @@ func main() {
 		strrt := ""
 
 		if search != "" {
-			search = strings.ToLower(search)
+			strrt = searchhangton(search)
+
+		} else {
+			log.Debugf("check request error")
+		}
+		c.Header("Response-Type", "ephemeral")
+		c.Header("Content-Type", "application/json")
+		//https://api.slack.com/docs/message-attachments
+		// c.String(http.StatusOK, strrt)
+
+		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
+
+	})
+
+	router.POST("/tonkho", func(c *gin.Context) {
+		//search := c.Param("search")
+		search := c.PostForm("text")
+		//log.Debugf("search text %s %v", search, c.Params)
+		search = strings.Trim(search, " ")
+		strrt := ""
+
+		if search == mytoken {
 			strrt = searchhangton(search)
 
 		} else {
@@ -171,18 +191,33 @@ func searchhangton(search string) string {
 		return errmsg
 	}
 
+	searches := strings.Split(search, " ")
+	isAuth := false
+	isTonKho := false
+	if search == mytoken {
+		isTonKho = true
+		isAuth = true
+	} else if searches[len(searches)-1] == mytoken {
+		isAuth = true
+		searches = searches[:len(searches)-1]
+		search = strings.Join(searches, " ")
+	}
+	search = strings.Trim(strings.ToLower(search), " ")
+
 	data := ``
 	count := 0
 	text := ``
 	datahang := make(map[string]HangTonData)
 	for _, dat := range hangton {
-		if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
+		if (isTonKho && dat.SLCanHienTai < 0) || strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
 			//check exist
 			if _, ok := datahang[dat.MaHang]; ok {
 				dattemp := datahang[dat.MaHang]
 				dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
+				dattemp.GiaHoreca += " " + dat.GiaHoreca
 				for key, sl := range dat.TL {
-					dattemp.TL[key] += sl
+					dattemp.TL[key] += " " + sl
+
 				}
 				datahang[dat.MaHang] = dattemp
 			} else {
@@ -198,9 +233,9 @@ func searchhangton(search string) string {
 		//arrival
 		arrival := ""
 		for name, sl := range dat.TL {
-			if sl > 0 {
+			if len(strings.Trim(sl, " ")) > 0 {
 				arrival += `,{"title": "` + name + `",
-				"value": "` + strconv.Itoa(sl) + `",
+				"value": "` + sl + `",
 				"short": false}`
 			}
 		}
@@ -219,15 +254,37 @@ func searchhangton(search string) string {
                     "title": "Tổng 2 Kho",
                     "value": "` + strconv.Itoa(dat.Tong2Kho) + `",
                     "short": true
-				}
-				,
+				}`
+		data += `,
                 {
                     "title": "Ước Lượng Bán 4 tháng",
                     "value": "` + strconv.Itoa(dat.UocLuongBan4Thang) + `",
                     "short": false
-				}` + arrival + `				
-            ]`
-		data += "},"
+				}`
+		data += `,
+                {
+                    "title": "Giá Horeca",
+                    "value": "` + dat.GiaHoreca + `",
+                    "short": false
+				}`
+		if isAuth {
+			data += `,
+                {
+                    "title": "SL cần hiện tại",
+                    "value": "` + strconv.Itoa(dat.SLCanHienTai) + `",
+                    "short": false
+				}`
+		}
+		if isAuth {
+			data += `,
+                {
+                    "title": "SL cần đầu kỳ",
+                    "value": "` + strconv.Itoa(dat.SLCanDauKy) + `",
+                    "short": false
+				}`
+		}
+
+		data += arrival + `"]},`
 		count++
 	}
 	text += `{"text":"`
@@ -269,7 +326,7 @@ func getExcelData() {
 			continue
 		}
 		var d HangTonData
-		d.TL = make(map[string]int)
+		d.TL = make(map[string]string)
 		var rowdata []string
 		for icol, colCell := range row {
 
@@ -312,7 +369,7 @@ func getExcelData() {
 			} else if colnametrim == "tổng 2 kho" {
 				d.Tong2Kho, _ = strconv.Atoi(celldata)
 			} else if colnametrim == "giá horeca" {
-				d.GiaHoreca, _ = strconv.Atoi(celldata)
+				d.GiaHoreca = celldata
 			} else if colnametrim == "bán trung bình tháng" {
 				d.BanTBThang, _ = strconv.Atoi(celldata)
 			} else if colnametrim == "ước lượng bán 4 tháng" {
@@ -322,7 +379,7 @@ func getExcelData() {
 			} else if colnametrim == "số lượng cần hiện tại" {
 				d.SLCanHienTai, _ = strconv.Atoi(celldata)
 			} else if len(colname) > 8 && strings.ToLower(colname[:9]) == "arriving-" {
-				d.TL[colname], _ = strconv.Atoi(celldata)
+				d.TL[colname] = celldata
 			}
 			rowdata = append(rowdata, celldata)
 		}
