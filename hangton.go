@@ -40,7 +40,7 @@ func main() {
 	//fmt.Println(mycrypto.Encode("abc,efc", 5))
 	flag.IntVar(&port, "port", 5084, "help message for flagname")
 	flag.BoolVar(&debug, "debug", false, "Indicates if debug messages should be printed in log files")
-	flag.StringVar(&mytoken, "token", "485@XVNT", "Indicates if debug messages should be printed in log files")
+	flag.StringVar(&mytoken, "token", "485xvnt", "Indicates if debug messages should be printed in log files")
 	flag.IntVar(&pagesize, "pagesize", 10, "Indicates if debug messages should be printed in log files")
 	flag.Parse()
 
