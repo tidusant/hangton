@@ -284,7 +284,7 @@ func searchhangton(search string) string {
 				}`
 		}
 
-		data += arrival + `"]},`
+		data += arrival + `]},`
 		count++
 	}
 	text += `{"text":"`
