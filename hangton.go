@@ -21,6 +21,7 @@ import (
 )
 
 var mytoken string
+var pagesize = 10
 var SheetName = "Sheet1"
 var hangton []HangTonData
 var errmsg = ""
@@ -40,6 +41,7 @@ func main() {
 	flag.IntVar(&port, "port", 5084, "help message for flagname")
 	flag.BoolVar(&debug, "debug", false, "Indicates if debug messages should be printed in log files")
 	flag.StringVar(&mytoken, "token", "485@XVNT", "Indicates if debug messages should be printed in log files")
+	flag.IntVar(&pagesize, "pagesize", 10, "Indicates if debug messages should be printed in log files")
 	flag.Parse()
 
 	//logLevel := log.DebugLevel
@@ -194,6 +196,13 @@ func searchhangton(search string) string {
 	searches := strings.Split(search, " ")
 	isAuth := false
 	isTonKho := false
+	page := 1
+	//check page
+	if len(searches) > 1 && searches[len(searches)-1][:4] == "page" {
+		page, _ = strconv.Atoi(searches[len(searches)-1][4:])
+		searches = searches[:len(searches)-1]
+		search = strings.Join(searches, " ")
+	}
 	if search == mytoken {
 		isTonKho = true
 		isAuth = true
@@ -208,8 +217,19 @@ func searchhangton(search string) string {
 	count := 0
 	text := ``
 	datahang := make(map[string]HangTonData)
+	outcount := 0
+	matchcount := 0
 	for _, dat := range hangton {
+
 		if (isTonKho && dat.SLCanHienTai < 0) || strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
+			//check paging
+			matchcount++
+			if matchcount-1 < (page-1)*pagesize {
+				continue
+			}
+			if outcount > pagesize-1 {
+				break
+			}
 			//check exist
 			if _, ok := datahang[dat.MaHang]; ok {
 				dattemp := datahang[dat.MaHang]
@@ -222,8 +242,11 @@ func searchhangton(search string) string {
 				datahang[dat.MaHang] = dattemp
 			} else {
 				datahang[dat.MaHang] = dat
+				outcount++
 			}
+
 		}
+
 	}
 	for _, dat := range datahang {
 		color := "#7CD197"
@@ -268,6 +291,7 @@ func searchhangton(search string) string {
                     "short": false
 				}`
 		if isAuth {
+
 			data += `,
                 {
                     "title": "SL cần hiện tại",
@@ -287,11 +311,27 @@ func searchhangton(search string) string {
 		data += arrival + `]},`
 		count++
 	}
+	//show paging
+	if matchcount > page*pagesize {
+		strnextpage := "/hang"
+		if isTonKho {
+			strnextpage = "/tonkho"
+		}
+		strnextpage += " " + search
+		if isAuth {
+			strnextpage += " " + mytoken
+		}
+		strnextpage += " page" + strconv.Itoa(page+1)
+		data += `{"title":"Next page: ` + strnextpage + `"}`
+	} else {
+		data = data[:len(data)-1]
+	}
+
 	text += `{"text":"`
 	attachments := ""
 	if count > 0 {
 		text += strconv.Itoa(count) + ` founds\n`
-		data = data[:len(data)-1]
+
 		attachments = `,"attachments": [` + data + `]`
 	} else {
 		text += ` not founds\n`
