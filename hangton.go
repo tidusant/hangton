@@ -263,7 +263,21 @@ func searchhangton(search string) string {
 		}
 
 	}
+
+	//reorder to get match exactly first
+	var datashow []HangTonData
+	for key, dat := range datahang {
+		if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search && search != "" {
+			datashow = append(datashow, dat)
+			delete(datahang, key)
+		}
+	}
+	//append not exactly match
 	for _, dat := range datahang {
+		datashow = append(datashow, dat)
+	}
+
+	for _, dat := range datashow {
 		color := "#7CD197"
 		if count%2 == 0 {
 			color = "#F35A00"
