@@ -213,6 +213,8 @@ func searchhangton(search string) string {
 		search = strings.Join(searches, " ")
 	}
 	search = strings.Trim(strings.ToLower(search), " ")
+	//search words
+	wordsearchs := strings.Split(search, " ")
 
 	data := ``
 	count := 0
@@ -221,8 +223,20 @@ func searchhangton(search string) string {
 	outcount := 0
 	matchcount := 0
 	for _, dat := range hangton {
+		isMatch := false
+		if isTonKho && dat.SLCanHienTai < 0 {
+			isMatch = true
+		} else {
+			//loop word search
+			for _, word := range wordsearchs {
+				if strings.Index(strings.ToLower(dat.TenHang), word) >= 0 || strings.ToLower(dat.MaHang) == word {
+					isMatch = true
+					break
+				}
+			}
+		}
 
-		if (isTonKho && dat.SLCanHienTai < 0) || (strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search) && search != "" {
+		if isMatch {
 			//check paging
 			matchcount++
 			if matchcount-1 < (page-1)*pagesize {
