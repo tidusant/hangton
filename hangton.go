@@ -294,8 +294,10 @@ func searchhangton(search string) string {
 	for _, mahang := range dataref {
 		datashow = append(datashow, datamatch[mahang])
 	}
-	for _, mahang := range dataref2 {
-		datashow = append(datashow, datamatch2[mahang])
+	if len(datashow) == 0 {
+		for _, mahang := range dataref2 {
+			datashow = append(datashow, datamatch2[mahang])
+		}
 	}
 
 	for i, dat := range datashow {
