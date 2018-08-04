@@ -219,14 +219,18 @@ func searchhangton(search string) string {
 	data := ``
 	count := 0
 	text := ``
-	datahang := make(map[string]HangTonData)
-	outcount := 0
-	matchcount := 0
+	datamatch := make(map[string]HangTonData)
+	datamatch2 := make(map[string]HangTonData)
+	dataref := []string{}
+	dataref2 := []string{}
+	//outcount := 0
+	//matchcount := 0
 	for _, dat := range hangton {
 		isMatch := false
 		if isTonKho && dat.SLCanHienTai < 0 {
 			isMatch = true
 		} else {
+
 			//loop word search
 			for _, word := range wordsearchs {
 				if strings.Index(strings.ToLower(dat.TenHang), word) >= 0 || strings.ToLower(dat.MaHang) == word {
@@ -237,27 +241,48 @@ func searchhangton(search string) string {
 		}
 
 		if isMatch {
-			//check paging
-			matchcount++
-			if matchcount-1 < (page-1)*pagesize {
-				continue
-			}
-			if outcount > pagesize-1 {
-				break
-			}
-			//check exist
-			if _, ok := datahang[dat.MaHang]; ok {
-				dattemp := datahang[dat.MaHang]
-				dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
-				dattemp.GiaHoreca += " " + dat.GiaHoreca
-				for key, sl := range dat.TL {
-					dattemp.TL[key] += " " + sl
+			// //check paging
+			// matchcount++
+			// if matchcount-1 < (page-1)*pagesize {
+			// 	continue
+			// }
+			// if outcount > pagesize-1 {
+			// 	break
+			// }
 
+			//exactly match
+			if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search && search != "" {
+				//check exist
+				if _, ok := datamatch[dat.MaHang]; ok {
+					dattemp := datamatch[dat.MaHang]
+					dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
+					dattemp.GiaHoreca += " " + dat.GiaHoreca
+					for key, sl := range dat.TL {
+						dattemp.TL[key] += " " + sl
+
+					}
+					datamatch[dat.MaHang] = dattemp
+				} else {
+					datamatch[dat.MaHang] = dat
+					dataref = append(dataref, dat.MaHang)
+					//outcount++
 				}
-				datahang[dat.MaHang] = dattemp
 			} else {
-				datahang[dat.MaHang] = dat
-				outcount++
+				//check exist
+				if _, ok := datamatch2[dat.MaHang]; ok {
+					dattemp := datamatch2[dat.MaHang]
+					dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
+					dattemp.GiaHoreca += " " + dat.GiaHoreca
+					for key, sl := range dat.TL {
+						dattemp.TL[key] += " " + sl
+
+					}
+					datamatch2[dat.MaHang] = dattemp
+				} else {
+					datamatch2[dat.MaHang] = dat
+					dataref2 = append(dataref2, dat.MaHang)
+					//outcount++
+				}
 			}
 
 		}
@@ -266,18 +291,23 @@ func searchhangton(search string) string {
 
 	//reorder to get match exactly first
 	var datashow []HangTonData
-	for key, dat := range datahang {
-		if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search && search != "" {
-			datashow = append(datashow, dat)
-			delete(datahang, key)
-		}
+	for _, mahang := range dataref {
+		datashow = append(datashow, datamatch[mahang])
 	}
-	//append not exactly match
-	for _, dat := range datahang {
-		datashow = append(datashow, dat)
+	for _, mahang := range dataref2 {
+		datashow = append(datashow, datamatch2[mahang])
 	}
 
-	for _, dat := range datashow {
+	for i, dat := range datashow {
+		//check paging
+
+		if i < (page-1)*pagesize {
+			continue
+		}
+		if i >= page*pagesize {
+			break
+		}
+
 		color := "#7CD197"
 		if count%2 == 0 {
 			color = "#F35A00"
@@ -341,7 +371,7 @@ func searchhangton(search string) string {
 		count++
 	}
 	//show paging
-	if matchcount > page*pagesize {
+	if count+pagesize*(page-1) < len(datashow) {
 		strnextpage := "/hang " + search
 		if isTonKho {
 			strnextpage = "/tonkho"
