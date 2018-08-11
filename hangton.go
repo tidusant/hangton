@@ -23,14 +23,30 @@ import (
 var mytoken string
 var pagesize = 10
 var SheetName = "Sheet1"
-var hangton []HangTonData
+var hangtonsg []HangTonData
+var hangtondn []HangTonData
+var hangtonhn []HangTonData
 var errmsg = ""
+var errmsgdn = ""
+var errmsgsg = ""
+var errmsghn = ""
 var updatetime = time.Now()
-var uploadFilename = "data"
+var uploadFilename = "tonkho"
+var updatetimedn = time.Now()
+var uploadFilenamedn = "tonkhodn"
+var updatetimehn = time.Now()
+var uploadFilenamehn = "tonkhodn"
 
 func init() {
-	hangton = []HangTonData{}
-	getExcelData()
+	hangtonsg = []HangTonData{}
+	getExcelData("sg")
+	errmsgsg = errmsg
+	hangtondn = []HangTonData{}
+	getExcelData("dn")
+	errmsgdn = errmsg
+	hangtonhn = []HangTonData{}
+	getExcelData("hn")
+	errmsghn = errmsg
 }
 
 func main() {
@@ -66,24 +82,35 @@ func main() {
 		strrt := ""
 
 		if search != "" {
-			strrt = searchhangton(search)
-
+			strrt = searchhangton(search, "sg")
 		} else {
 			log.Debugf("check request error")
 		}
-
-		// c.Header("Content-Type", "application/json; charset=utf-8")
-		// c.Next()
-		// c.JSON(http.StatusOK, strrt)
-
 		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
+	})
+	router.GET("/hangdn/:search", func(c *gin.Context) {
+		search := c.Param("search")
+		search = strings.Trim(search, " ")
+		strrt := ""
 
-		// log.Debugf("%s", strrt)
-		// c.Bind(&hangton)
-		// c.JSON(http.StatusOK, hangton)
+		if search != "" {
+			strrt = searchhangton(search, "dn")
+		} else {
+			log.Debugf("check request error")
+		}
+		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
+	})
+	router.GET("/hanghn/:search", func(c *gin.Context) {
+		search := c.Param("search")
+		search = strings.Trim(search, " ")
+		strrt := ""
 
-		//c.String(http.StatusOK, strrt)
-
+		if search != "" {
+			strrt = searchhangton(search, "hn")
+		} else {
+			log.Debugf("check request error")
+		}
+		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
 	})
 
 	router.POST("/hang", func(c *gin.Context) {
@@ -94,15 +121,53 @@ func main() {
 		strrt := ""
 
 		if search != "" {
-			strrt = searchhangton(search)
+			strrt = searchhangton(search, "sg")
 
 		} else {
 			log.Debugf("check request error")
 		}
 		c.Header("Response-Type", "ephemeral")
 		c.Header("Content-Type", "application/json")
-		//https://api.slack.com/docs/message-attachments
-		// c.String(http.StatusOK, strrt)
+
+		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
+
+	})
+
+	router.POST("/hangdn", func(c *gin.Context) {
+		//search := c.Param("search")
+		search := c.PostForm("text")
+		//log.Debugf("search text %s %v", search, c.Params)
+
+		strrt := ""
+
+		if search != "" {
+			strrt = searchhangton(search, "dn")
+
+		} else {
+			log.Debugf("check request error")
+		}
+		c.Header("Response-Type", "ephemeral")
+		c.Header("Content-Type", "application/json")
+
+		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
+
+	})
+
+	router.POST("/hanghn", func(c *gin.Context) {
+		//search := c.Param("search")
+		search := c.PostForm("text")
+		//log.Debugf("search text %s %v", search, c.Params)
+
+		strrt := ""
+
+		if search != "" {
+			strrt = searchhangton(search, "hn")
+
+		} else {
+			log.Debugf("check request error")
+		}
+		c.Header("Response-Type", "ephemeral")
+		c.Header("Content-Type", "application/json")
 
 		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
 
@@ -116,7 +181,7 @@ func main() {
 		strrt := ""
 
 		if search != "" {
-			strrt = searchhangton(search)
+			strrt = searchhangton(search, "sg")
 
 		} else {
 			log.Debugf("check request error")
@@ -148,15 +213,24 @@ func main() {
 
 		form, _ := c.MultipartForm()
 		files := form.File["file"]
+		filetype := c.PostForm("filetype")
+		errmsg = ""
+		fileuploadname := ""
 		for i, file := range files {
 			log.Debugf("filename %d:%s - %s, %v", i, file.Filename, file.Header)
 
 			filetmp, _ := file.Open()
 
 			//file name
-			uploadFilename = file.Filename
+			fileuploadname = file.Filename
 			filename := "tonkho.xlsx"
+			if filetype == "dn" {
+				filename = "tonkhodn.xlsx"
+			} else if filetype == "hn" {
+				filename = "tonkhohn.xlsx"
+			}
 			data, err := ioutil.ReadAll(filetmp)
+
 			if err != nil {
 				errmsg = fmt.Sprintf("%v", err)
 				c.String(http.StatusOK, errmsg)
@@ -166,12 +240,32 @@ func main() {
 				errmsg = fmt.Sprintf("%v", err)
 				c.String(http.StatusOK, errmsg)
 			}
+
 		}
-		getExcelData()
-		message := "Done, " + strconv.Itoa(len(hangton)) + " rows were updated"
-		if errmsg != "" {
+		if errmsg == "" {
+			getExcelData(filetype)
+		}
+
+		message := ""
+		if errmsg == "" {
+			if filetype == "dn" {
+				errmsgdn = ""
+				message = "Done, " + strconv.Itoa(len(hangtondn)) + " rows were updated"
+				uploadFilenamedn = fileuploadname
+			} else if filetype == "hn" {
+				errmsgdn = ""
+				message = "Done, " + strconv.Itoa(len(hangtonhn)) + " rows were updated"
+				uploadFilenamehn = fileuploadname
+			} else {
+				errmsgsg = ""
+				message = "Done, " + strconv.Itoa(len(hangtonsg)) + " rows were updated"
+				uploadFilename = fileuploadname
+			}
+
+		} else {
 			message = errmsg
 		}
+
 		c.HTML(http.StatusOK,
 			// Use the index.html template
 			"file.html",
@@ -187,10 +281,24 @@ func main() {
 
 }
 
-func searchhangton(search string) string {
+func searchhangton(search, filetype string) string {
 	//log.Debugf("searchhangton error message:%s", errmsg)
-	if errmsg != "" {
-		return errmsg
+	hangtonsearch := []HangTonData{}
+	if filetype == "sg" {
+		if errmsgsg != "" {
+			return errmsgsg
+		}
+		hangtonsearch = hangtonsg
+	} else if filetype == "dn" {
+		if errmsgdn != "" {
+			return errmsgdn
+		}
+		hangtonsearch = hangtondn
+	} else if filetype == "hn" {
+		if errmsghn != "" {
+			return errmsghn
+		}
+		hangtonsearch = hangtonhn
 	}
 
 	searches := strings.Split(search, " ")
@@ -225,7 +333,7 @@ func searchhangton(search string) string {
 	dataref2 := []string{}
 	//outcount := 0
 	//matchcount := 0
-	for _, dat := range hangton {
+	for _, dat := range hangtonsearch {
 		isMatch := false
 		if isTonKho && dat.SLCanHienTai < 0 {
 			isMatch = true
@@ -256,6 +364,7 @@ func searchhangton(search string) string {
 				if _, ok := datamatch[dat.MaHang]; ok {
 					dattemp := datamatch[dat.MaHang]
 					dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
+					dattemp.Tong2Kho += dattemp.TonCuoiSL
 					dattemp.GiaHoreca += " " + dat.GiaHoreca
 					for key, sl := range dat.TL {
 						dattemp.TL[key] += " " + sl
@@ -272,6 +381,7 @@ func searchhangton(search string) string {
 				if _, ok := datamatch2[dat.MaHang]; ok {
 					dattemp := datamatch2[dat.MaHang]
 					dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
+					dattemp.Tong2Kho += dattemp.TonCuoiSL
 					dattemp.GiaHoreca += " " + dat.GiaHoreca
 					for key, sl := range dat.TL {
 						dattemp.TL[key] += " " + sl
@@ -335,22 +445,24 @@ func searchhangton(search string) string {
                     "short": true
                 },
                 {
-                    "title": "Tổng 2 Kho",
+                    "title": "Tổng Kho",
                     "value": "` + strconv.Itoa(dat.Tong2Kho) + `",
                     "short": true
 				}`
-		data += `,
+		if filetype == "sg" {
+			data += `,
                 {
                     "title": "Ước Lượng Bán 4 tháng",
                     "value": "` + strconv.Itoa(dat.UocLuongBan4Thang) + `",
                     "short": false
 				}`
-		data += `,
+			data += `,
                 {
                     "title": "Giá Horeca",
                     "value": "` + dat.GiaHoreca + `",
                     "short": false
 				}`
+		}
 		if isAuth {
 
 			data += `,
@@ -375,6 +487,9 @@ func searchhangton(search string) string {
 	//show paging
 	if count+pagesize*(page-1) < len(datashow) {
 		strnextpage := "/hang " + search
+		if filetype == "dn" || filetype == "hn" {
+			strnextpage = "/hang" + filetype + " " + search
+		}
 		if isTonKho {
 			strnextpage = "/tonkho"
 		}
@@ -384,7 +499,9 @@ func searchhangton(search string) string {
 		strnextpage += " p" + strconv.Itoa(page+1)
 		data += `{"title":"Next page: ` + strnextpage + `"}`
 	} else {
-		data = data[:len(data)-1]
+		if len(data) > 0 {
+			data = data[:len(data)-1]
+		}
 	}
 
 	text += `{"text":"`
@@ -396,20 +513,54 @@ func searchhangton(search string) string {
 	} else {
 		text += ` not founds\n`
 	}
-
-	text += `*` + uploadFilename + `* updated at: ` + updatetime.Format("15:04 02-01-2006") + `" ` + attachments + `}`
+	filename := uploadFilename
+	if filetype == "dn" {
+		filename = uploadFilenamedn
+	} else if filetype == "hn" {
+		filename = uploadFilenamehn
+	}
+	text += `*` + filename + `* updated at: ` + updatetime.Format("15:04 02-01-2006") + `" ` + attachments + `}`
 
 	return text
 }
 
-func getExcelData() {
+func getExcelData(filetype string) {
+	errmsg = ""
 	defer func() { //catch or finally
 		if err := recover(); err != nil { //catch
 			errmsg = fmt.Sprintf("Exception: %v", err)
 		}
 	}()
-
-	xlsx, err := excelize.OpenFile("./data/tonkho.xlsx")
+	filename := "tonkho.xlsx"
+	colRequire := make(map[string]bool)
+	if filetype == "dn" {
+		filename = "tonkhodn.xlsx"
+		colRequire = map[string]bool{
+			"mã hàng":     false,
+			"tên hàng":    false,
+			"tồn cuối sl": false,
+			"giá horeca":  false,
+		}
+	} else if filetype == "hn" {
+		filename = "tonkhohn.xlsx"
+		colRequire = map[string]bool{
+			"mã hàng":     false,
+			"tên hàng":    false,
+			"tồn cuối sl": false,
+			"giá horeca":  false,
+		}
+	} else {
+		colRequire = map[string]bool{
+			"mã hàng":               false,
+			"tên hàng":              false,
+			"tồn cuối sl":           false,
+			"giá horeca":            false,
+			"ước lượng bán 4 tháng": false,
+			"số lượng cần hiện tại": false,
+			"số lượng cần đầu kỳ":   false,
+		}
+	}
+	xlsx, err := excelize.OpenFile("./data/" + filename)
 	if err != nil {
 		errmsg = err.Error()
 
@@ -421,13 +572,34 @@ func getExcelData() {
 	sheetdata := xlsx.Sheet["xl/worksheets/sheet1.xml"]
 	mergecells := sheetdata.MergeCells.Cells
 	hdata := []HangTonData{}
+	//check column require
+	headerrow := 1
+	if filetype == "sg" {
+		headerrow = 4
+	}
+	for icol, _ := range rows[0] {
+		colname := xlsx.GetCellValue(SheetName, excelize.ToAlphaString(icol)+strconv.Itoa(headerrow))
+		colname = strings.Replace(strings.Replace(strings.Replace(colname, "\r\n", " ", -1), "\n", " ", -1), "\"", "“", -1)
+		colnametrim := strings.Trim(strings.ToLower(colname), " ")
+		if _, ok := colRequire[colnametrim]; ok {
+			colRequire[colnametrim] = true
+		}
+	}
+	for colname, colreq := range colRequire {
+		if !colreq {
+			errmsg = `ERROR! Column "` + colname + `" is required!`
+			return
+		}
+	}
+
 	for irow, row := range rows {
-		if irow < 5 {
+		if irow <= headerrow-1 {
 			continue
 		}
 		var d HangTonData
 		d.TL = make(map[string]string)
 		var rowdata []string
+
 		for icol, colCell := range row {
 
 			celldata := colCell
@@ -444,7 +616,7 @@ func getExcelData() {
 				}
 			}
 			//check name column
-			colname := xlsx.GetCellValue(SheetName, excelize.ToAlphaString(icol)+"4")
+			colname := xlsx.GetCellValue(SheetName, excelize.ToAlphaString(icol)+strconv.Itoa(headerrow))
 			colname = strings.Replace(strings.Replace(strings.Replace(colname, "\r\n", " ", -1), "\n", " ", -1), "\"", "“", -1)
 			colnametrim := strings.Trim(strings.ToLower(colname), " ")
 			celldata = strings.Replace(strings.Replace(strings.Replace(celldata, "\r\n", " ", -1), "\n", " ", -1), "\"", "“", -1)
@@ -481,15 +653,27 @@ func getExcelData() {
 			} else if len(colname) > 8 && strings.ToLower(colname[:9]) == "arriving-" {
 				d.TL[colname] = celldata
 			}
+
 			rowdata = append(rowdata, celldata)
 		}
 
 		hdata = append(hdata, d)
 
 	}
-	hangton = hdata
-	errmsg = ""
-	updatetime = time.Now()
+	if filetype == "dn" {
+		hangtondn = hdata
+		errmsgdn = ""
+		updatetimedn = time.Now()
+	} else if filetype == "hn" {
+		hangtonhn = hdata
+		errmsghn = ""
+		updatetimehn = time.Now()
+	} else {
+		hangtonsg = hdata
+		errmsg = ""
+		updatetime = time.Now()
+	}
+
 }
 
 // checkCellInArea provides function to determine if a given coordinate is

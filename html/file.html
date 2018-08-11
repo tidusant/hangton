@@ -17,8 +17,21 @@
 <body class="container">
   <!--Embed the menu.html template at this location-->
   <form action="/file" method="post" enctype="multipart/form-data" class="uploadForm">
-		<input class="uploadForm__input" type="file" name="file" id="inputFile" accept="xlsx/*">		
-		<button type="submit">Submit</button>
+    <input class="uploadForm__input" type="file" name="file" id="inputFile" accept="xlsx/*">	
+    <input type="hidden" name="filetype"	value="sg"/>
+		<button type="submit">Sai Gon Submit</button>
+</form>
+<br />
+<form action="/file" method="post" enctype="multipart/form-data" class="uploadForm" name="dnform">
+  <input class="uploadForm__input" type="file" name="file" id="inputFile" accept="xlsx/*">		
+  <input type="hidden" name="filetype"	value="dn"/>
+  <button type="submit">Da Nang Submit</button>
+</form>
+<br />
+<form action="/file" method="post" enctype="multipart/form-data" class="uploadForm" name="hnform">
+  <input class="uploadForm__input" type="file" name="file" id="inputFile" accept="xlsx/*">		
+  <input type="hidden" name="filetype"	value="hn"/>
+  <button type="submit">Ha Noi Submit</button>
 </form>
 <div>{{.message}}</div>
 </body>
