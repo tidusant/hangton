@@ -364,7 +364,9 @@ func searchhangton(search, filetype string) string {
 				if _, ok := datamatch[dat.MaHang]; ok {
 					dattemp := datamatch[dat.MaHang]
 					dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
-					dattemp.Tong2Kho += dattemp.TonCuoiSL
+					log.Debugf("dattemp %v", dattemp)
+					log.Debugf("dat %v", dat)
+					dattemp.Tong2Kho += dat.TonCuoiSL
 					dattemp.GiaHoreca += " " + dat.GiaHoreca
 					for key, sl := range dat.TL {
 						dattemp.TL[key] += " " + sl
@@ -372,7 +374,9 @@ func searchhangton(search, filetype string) string {
 					}
 					datamatch[dat.MaHang] = dattemp
 				} else {
+					dat.Tong2Kho = dat.TonCuoiSL
 					datamatch[dat.MaHang] = dat
+
 					dataref = append(dataref, dat.MaHang)
 					//outcount++
 				}
@@ -389,6 +393,7 @@ func searchhangton(search, filetype string) string {
 					}
 					datamatch2[dat.MaHang] = dattemp
 				} else {
+					dat.Tong2Kho = dat.TonCuoiSL
 					datamatch2[dat.MaHang] = dat
 					dataref2 = append(dataref2, dat.MaHang)
 					//outcount++
