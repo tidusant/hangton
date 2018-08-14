@@ -223,22 +223,27 @@ func main() {
 
 			//file name
 			fileuploadname = file.Filename
-			filename := "tonkho.xlsx"
-			if filetype == "dn" {
-				filename = "tonkhodn.xlsx"
-			} else if filetype == "hn" {
-				filename = "tonkhohn.xlsx"
-			}
-			data, err := ioutil.ReadAll(filetmp)
+			log.Debugf("filename %d:%s - %s", i, fileuploadname[len(fileuploadname)-5:])
+			if fileuploadname[len(fileuploadname)-5:] != ".xlsx" {
+				errmsg = "ERROR: must upload .xlsx file extension!"
+			} else {
+				filename := "tonkho.xlsx"
+				if filetype == "dn" {
+					filename = "tonkhodn.xlsx"
+				} else if filetype == "hn" {
+					filename = "tonkhohn.xlsx"
+				}
+				data, err := ioutil.ReadAll(filetmp)
 
-			if err != nil {
-				errmsg = fmt.Sprintf("%v", err)
-				c.String(http.StatusOK, errmsg)
-			}
-			err = ioutil.WriteFile("./data/"+filename, data, 0666)
-			if err != nil {
-				errmsg = fmt.Sprintf("%v", err)
-				c.String(http.StatusOK, errmsg)
+				if err != nil {
+					errmsg = fmt.Sprintf("%v", err)
+					c.String(http.StatusOK, errmsg)
+				}
+				err = ioutil.WriteFile("./data/"+filename, data, 0666)
+				if err != nil {
+					errmsg = fmt.Sprintf("%v", err)
+					c.String(http.StatusOK, errmsg)
+				}
 			}
 
 		}
