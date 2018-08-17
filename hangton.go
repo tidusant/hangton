@@ -577,7 +577,7 @@ func getExcelData(filetype string) {
 	}
 
 	// Get all the rows in the Sheet1.
-	rows := xlsx.GetRows(SheetName)
+	rows := xlsx.GetRows(xlsx.GetSheetName(xlsx.GetActiveSheetIndex()))
 
 	sheetdata := xlsx.Sheet["xl/worksheets/sheet1.xml"]
 	mergecells := sheetdata.MergeCells.Cells
