@@ -369,8 +369,7 @@ func searchhangton(search, filetype string) string {
 				if _, ok := datamatch[dat.MaHang]; ok {
 					dattemp := datamatch[dat.MaHang]
 					dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
-					log.Debugf("dattemp %v", dattemp)
-					log.Debugf("dat %v", dat)
+
 					dattemp.Tong2Kho += dat.TonCuoiSL
 					dattemp.GiaHoreca += " " + dat.GiaHoreca
 					for key, sl := range dat.TL {
@@ -380,15 +379,10 @@ func searchhangton(search, filetype string) string {
 					datamatch[dat.MaHang] = dattemp
 				} else {
 					dat.Tong2Kho = dat.TonCuoiSL
-					//log.Debugf("datamatch %v", dat)
 					datm := dat
-					//c3mcommon.CloneValue(dat, datm)
 					datm.TL = make(map[string]string)
 					datamatch[dat.MaHang] = datm
-
-					//c3mcommon.CloneValue(datm.TL, datamatch[dat.MaHang].TL)
 					//deep copy
-
 					for key, val := range dat.TL {
 						datamatch[dat.MaHang].TL[key] = val
 					}
@@ -411,7 +405,13 @@ func searchhangton(search, filetype string) string {
 					datamatch2[dat.MaHang] = dattemp
 				} else {
 					dat.Tong2Kho = dat.TonCuoiSL
-					datamatch2[dat.MaHang] = dat
+					datm := dat
+					datm.TL = make(map[string]string)
+					datamatch[dat.MaHang] = datm
+					//deep copy
+					for key, val := range dat.TL {
+						datamatch[dat.MaHang].TL[key] = val
+					}
 					dataref2 = append(dataref2, dat.MaHang)
 					//outcount++
 				}
