@@ -536,12 +536,15 @@ func searchhangton(search, filetype string) string {
 		text += ` not founds\n`
 	}
 	filename := uploadFilename
+	updatetimestr := updatetime.Format("15:04 02-01-2006")
 	if filetype == "dn" {
 		filename = uploadFilenamedn
+		updatetimestr = updatetimedn.Format("15:04 02-01-2006")
 	} else if filetype == "hn" {
 		filename = uploadFilenamehn
+		updatetimestr = updatetimehn.Format("15:04 02-01-2006")
 	}
-	text += `*` + filename + `* updated at: ` + updatetime.Format("15:04 02-01-2006") + `" ` + attachments + `}`
+	text += `*` + filename + `* updated at: ` + updatetimestr + `" ` + attachments + `}`
 
 	return text
 }
