@@ -342,13 +342,15 @@ func searchhangton(search, filetype string) string {
 	for _, dat := range hangtonsearch {
 		isMatch := false
 		if isTonKho && dat.SLCanHienTai < 0 {
+			//log.Debugf("matched: %v", dat.SLCanHienTai)
 			isMatch = true
 		} else {
 
 			//loop word search
 			for _, word := range wordsearchs {
-				if strings.Index(strings.ToLower(dat.TenHang), word) >= 0 || strings.ToLower(dat.MaHang) == word {
+				if word != "" && (strings.Index(strings.ToLower(dat.TenHang), word) >= 0 || strings.ToLower(dat.MaHang) == word) {
 					isMatch = true
+					//log.Debugf("fail matched: %s - %s - %s", dat.TenHang, word, search)
 					break
 				}
 			}
@@ -366,8 +368,9 @@ func searchhangton(search, filetype string) string {
 			// }
 
 			//exactly match
-			if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
+			if isTonKho || strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
 				//check exist
+				log.Debugf("exactly matched: %v", dat.SLCanHienTai)
 				if _, ok := datamatch[dat.MaHang]; ok {
 
 					dattemp := datamatch[dat.MaHang]
@@ -397,7 +400,7 @@ func searchhangton(search, filetype string) string {
 				//log.Debugf("exactly matched: %v", dat.MaHang)
 			} else {
 				//check exist
-				log.Debugf("check exist %v", datamatch2[dat.MaHang])
+				//log.Debugf("check exist %v", datamatch2[dat.MaHang])
 				if _, ok := datamatch2[dat.MaHang]; ok {
 					//log.Debugf("exist: %v", dat.MaHang)
 					dattemp := datamatch2[dat.MaHang]
@@ -432,6 +435,7 @@ func searchhangton(search, filetype string) string {
 	var datashow []HangTonData
 	for _, mahang := range dataref {
 		datashow = append(datashow, datamatch[mahang])
+
 	}
 	if len(datashow) == 0 {
 		for _, mahang := range dataref2 {
