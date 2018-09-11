@@ -100,6 +100,7 @@ func main() {
 		}
 		c.Data(200, "application/json; charset=utf-8", []byte(strrt))
 	})
+
 	router.GET("/hanghn/:search", func(c *gin.Context) {
 		search := c.Param("search")
 		search = strings.Trim(search, " ")
@@ -354,6 +355,7 @@ func searchhangton(search, filetype string) string {
 		}
 
 		if isMatch {
+			//log.Debugf("matched: %v", dat)
 			// //check paging
 			// matchcount++
 			// if matchcount-1 < (page-1)*pagesize {
@@ -364,9 +366,10 @@ func searchhangton(search, filetype string) string {
 			// }
 
 			//exactly match
-			if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search && search != "" {
+			if strings.Index(strings.ToLower(dat.TenHang), search) >= 0 || strings.ToLower(dat.MaHang) == search {
 				//check exist
 				if _, ok := datamatch[dat.MaHang]; ok {
+
 					dattemp := datamatch[dat.MaHang]
 					dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
 
@@ -391,9 +394,12 @@ func searchhangton(search, filetype string) string {
 					dataref = append(dataref, dat.MaHang)
 					//outcount++
 				}
+				//log.Debugf("exactly matched: %v", dat.MaHang)
 			} else {
 				//check exist
+				log.Debugf("check exist %v", datamatch2[dat.MaHang])
 				if _, ok := datamatch2[dat.MaHang]; ok {
+					//log.Debugf("exist: %v", dat.MaHang)
 					dattemp := datamatch2[dat.MaHang]
 					dattemp.UocLuongBan4Thang = dat.UocLuongBan4Thang
 					dattemp.Tong2Kho += dattemp.TonCuoiSL
@@ -407,14 +413,15 @@ func searchhangton(search, filetype string) string {
 					dat.Tong2Kho = dat.TonCuoiSL
 					datm := dat
 					datm.TL = make(map[string]string)
-					datamatch[dat.MaHang] = datm
+					datamatch2[dat.MaHang] = datm
 					//deep copy
 					for key, val := range dat.TL {
-						datamatch[dat.MaHang].TL[key] = val
+						datamatch2[dat.MaHang].TL[key] = val
 					}
 					dataref2 = append(dataref2, dat.MaHang)
 					//outcount++
 				}
+				//log.Debugf("partial matched: %v", dataref2)
 			}
 
 		}
@@ -431,7 +438,7 @@ func searchhangton(search, filetype string) string {
 			datashow = append(datashow, datamatch2[mahang])
 		}
 	}
-
+	//log.Debugf("datamatch: %v", datamatch)
 	for i, dat := range datashow {
 		//check paging
 
