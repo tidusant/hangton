@@ -37,6 +37,10 @@ var uploadFilenamedn = "tonkhodn"
 var updatetimehn = time.Now()
 var uploadFilenamehn = "tonkhodn"
 
+type xlsxMergeCell struct {
+	Ref string `xml:"ref,attr,omitempty"`
+}
+
 func init() {
 	hangtonsg = []HangTonData{}
 	getExcelData("sg")
@@ -606,7 +610,13 @@ func getExcelData(filetype string) {
 	rows := xlsx.GetRows(xlsx.GetSheetName(xlsx.GetActiveSheetIndex()))
 
 	sheetdata := xlsx.Sheet["xl/worksheets/sheet1.xml"]
-	mergecells := sheetdata.MergeCells.Cells
+	var mergecellRef []string
+	if sheetdata.MergeCells != nil {
+		for _, cell := range sheetdata.MergeCells.Cells {
+			mergecellRef = append(mergecellRef, cell.Ref)
+		}
+	}
+
 	hdata := []HangTonData{}
 	//check column require
 	headerrow := 1
@@ -640,12 +650,13 @@ func getExcelData(filetype string) {
 
 			celldata := colCell
 			//check mergcell
-			if colCell == "" {
-				for _, mergecell := range mergecells {
-					ref := strings.Split(mergecell.Ref, ":")
+			if colCell == "" && len(mergecellRef) > 0 {
+
+				for _, cellRef := range mergecellRef {
+					ref := strings.Split(cellRef, ":")
 
 					cellname := excelize.ToAlphaString(icol) + strconv.Itoa(irow+1)
-					if checkCellInArea(cellname, mergecell.Ref) {
+					if checkCellInArea(cellname, cellRef) {
 						celldata = xlsx.GetCellValue(SheetName, ref[0])
 						break
 					}
