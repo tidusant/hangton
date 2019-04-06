@@ -61,7 +61,7 @@ func main() {
 	flag.IntVar(&port, "port", 5084, "help message for flagname")
 	flag.BoolVar(&debug, "debug", false, "Indicates if debug messages should be printed in log files")
 	flag.StringVar(&mytoken, "token", "489xvnt", "Indicates if debug messages should be printed in log files")
-	flag.IntVar(&pagesize, "pagesize", 30, "Indicates if debug messages should be printed in log files")
+	flag.IntVar(&pagesize, "pagesize", 10, "Indicates if debug messages should be printed in log files")
 	flag.Parse()
 
 	//logLevel := log.DebugLevel
