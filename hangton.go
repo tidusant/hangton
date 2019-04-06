@@ -607,7 +607,7 @@ func getExcelData(filetype string) {
 	}
 
 	// Get all the rows in the Sheet1.
-	rows := xlsx.GetRows(xlsx.GetSheetName(xlsx.GetActiveSheetIndex()))
+	rows,_ := xlsx.GetRows(xlsx.GetSheetName(xlsx.GetActiveSheetIndex()))
 
 	sheetdata := xlsx.Sheet["xl/worksheets/sheet1.xml"]
 	var mergecellRef []string
@@ -624,7 +624,8 @@ func getExcelData(filetype string) {
 		headerrow = 4
 	}
 	for icol, _ := range rows[0] {
-		colname := xlsx.GetCellValue(SheetName, excelize.ToAlphaString(icol)+strconv.Itoa(headerrow))
+		exlcolname,_:=excelize.ColumnNumberToName(icol)
+		colname,_ := xlsx.GetCellValue(SheetName, exlcolname+strconv.Itoa(headerrow))
 		colname = strings.Replace(strings.Replace(strings.Replace(colname, "\r\n", " ", -1), "\n", " ", -1), "\"", "“", -1)
 		colnametrim := strings.Trim(strings.ToLower(colname), " ")
 		if _, ok := colRequire[colnametrim]; ok {
@@ -650,20 +651,21 @@ func getExcelData(filetype string) {
 
 			celldata := colCell
 			//check mergcell
+			exlcolname,_:=excelize.ColumnNumberToName(icol)
 			if colCell == "" && len(mergecellRef) > 0 {
 
 				for _, cellRef := range mergecellRef {
 					ref := strings.Split(cellRef, ":")
-
-					cellname := excelize.ToAlphaString(icol) + strconv.Itoa(irow+1)
+					//exlcolname,_:=excelize.ColumnNumberToName(icol)
+					cellname := exlcolname + strconv.Itoa(irow+1)
 					if checkCellInArea(cellname, cellRef) {
-						celldata = xlsx.GetCellValue(SheetName, ref[0])
+						celldata,_ = xlsx.GetCellValue(SheetName, ref[0])
 						break
 					}
 				}
 			}
 			//check name column
-			colname := xlsx.GetCellValue(SheetName, excelize.ToAlphaString(icol)+strconv.Itoa(headerrow))
+			colname,_ := xlsx.GetCellValue(SheetName, exlcolname+strconv.Itoa(headerrow))
 			colname = strings.Replace(strings.Replace(strings.Replace(colname, "\r\n", " ", -1), "\n", " ", -1), "\"", "“", -1)
 			colnametrim := strings.Trim(strings.ToLower(colname), " ")
 			celldata = strings.Replace(strings.Replace(strings.Replace(celldata, "\r\n", " ", -1), "\n", " ", -1), "\"", "“", -1)
