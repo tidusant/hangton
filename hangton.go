@@ -624,7 +624,7 @@ func getExcelData(filetype string) {
 		headerrow = 4
 	}
 	for icol, _ := range rows[0] {
-		exlcolname,_:=excelize.ColumnNumberToName(icol)
+		exlcolname,_:=excelize.ColumnNumberToName(icol+1)
 		colname,_ := xlsx.GetCellValue(SheetName, exlcolname+strconv.Itoa(headerrow))
 		colname = strings.Replace(strings.Replace(strings.Replace(colname, "\r\n", " ", -1), "\n", " ", -1), "\"", "“", -1)
 		colnametrim := strings.Trim(strings.ToLower(colname), " ")
