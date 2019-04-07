@@ -649,9 +649,11 @@ func getExcelData(filetype string) {
 
 		for icol, colCell := range row {
 
+
 			celldata := colCell
 			//check mergcell
-			exlcolname,_:=excelize.ColumnNumberToName(icol)
+			exlcolname,_:=excelize.ColumnNumberToName(icol+1)
+		
 			if colCell == "" && len(mergecellRef) > 0 {
 
 				for _, cellRef := range mergecellRef {
